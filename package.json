@@ -1,0 +1,30 @@
+{
+    "name": "task",
+    "version": "1.0.0",
+    "author": "Marchuan Van Der Merwe",
+    "description": "create a task that will resolve with a promise",
+    "type": "module",
+    "license": "UNLICENSED",
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/marchuanv/task"
+    },
+    "engines": {
+        "npm": ">=8.19.4",
+        "node": ">=16.20.2"
+    },
+    "files": [
+        "lib"
+    ],
+    "main": "task-adapter.mjs",
+    "scripts": {
+        "test": "node specs/index.mjs"
+    },
+    "keywords": [
+        "task",
+        "promise"
+    ],
+    "dependencies": {
+        "jasmine": "^5.1.0"
+    }
+}
