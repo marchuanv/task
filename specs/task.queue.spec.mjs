@@ -1,13 +1,15 @@
 
-import { TaskQueue } from '../lib/task-queue.mjs';
 import { Task } from '../task.mjs';
 fdescribe('when enqueuing a task', () => {
     it('should', async (done) => {
-       const taskA = new Task('TaskA', { Id: 'TaskAId' }, {}, []);
-       const taskB = new Task('TaskB', { Id: 'TaskAId' }, {}, []);
-       const taskC = new Task('TaskB', { Id: 'TaskAId' }, {}, []);
-       TaskQueue.enqueue(taskA);
-       TaskQueue.enqueue(taskB);
-       TaskQueue.enqueue(taskC);
+        Task.create('TaskA', { Id: 'TaskAId' }, {}, []).queue(Object.prototype, () => {
+            console.log('running task A');
+        });
+        Task.create('TaskB', { Id: 'TaskBId' }, {}, []).queue(Object.prototype, () => {
+            console.log('running task B');
+        });
+        Task.create('TaskC', { Id: 'TaskCId' }, {}, []).queue(Object.prototype, () => {
+            console.log('running task C');
+        });
     });
 });

@@ -70,10 +70,11 @@ export class Task extends TaskProperties {
     */
     queue(type, callback) {
         const properties = privateBag.get(this);
+        properties.stack = (new Error()).stack;
         properties.callback = callback;
         return new Promise((resolve) => {
-            const properties = privateBag.get(this);
             properties.resolve = resolve;
+            TaskQueue.enqueue(this);
         });
     }
     /**
@@ -90,27 +91,6 @@ export class Task extends TaskProperties {
         const { state } = privateBag.get(this);
         return state;
     }
-    async run() {
-        const properties = privateBag.get(this);
-        const { context, data, dependencies } = properties;
-        properties.stack = (new Error()).stack;
-        if (this.state === TaskState.Ready) {
-            const nonLongRunningTasks = dependencies.filter(td => td.state !== TaskState.LongRunning);
-            const doneDependantTaskCount = nonLongRunningTasks.filter(td => td.state === TaskState.Done).length;
-            const totalDependantTaskCount = nonLongRunningTasks.length;
-            if (doneDependantTaskCount !== totalDependantTaskCount) { //are all the dependencies finished?
-                TaskQueue.enqueue(this);
-            } else {
-                properties.state = TaskState.CallbackStarted;
-                await properties.callback.call(this, context, data);
-                if (this.state === TaskState.CallbackStarted) {
-                    properties.state = TaskState.CallbackReturned;
-                }
-            }
-        } else {
-            TaskQueue.enqueue(this);
-        }
-    }
     /**
      * @param { Object }
     */
@@ -126,7 +106,7 @@ export class Task extends TaskProperties {
             }
         } else {
             properties.state = TaskState.Error;
-            throw new Error(`critical error, complete task was called without a promise resolve function`);
+            properties.error = new Error(`critical error, complete task was called without a promise resolve function`);
         }
     }
     /**
