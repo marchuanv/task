@@ -1,14 +1,14 @@
 import { TaskFlag } from '../lib/task-flag.mjs';
 import { TaskState } from '../lib/task-state.mjs';
 import { Task } from '../task.mjs';
-fdescribe('when queueing tasks given a repeat task flag and long running tasks', () => {
+fdescribe('when queueing tasks given a repeat not response task flag and long running tasks', () => {
     it('should run indefinitely', (done) => {
         let executedTasks = [];
         let isRepeatTaskALongRunning = false;
         let isRepeatTaskBLongRunning = false;
         let isRepeatTaskCLongRunning = false;
         const block = new Promise((resolve) => setTimeout(resolve, 3000));
-        Task.create('RepeatLongTaskA', { Id: 'RepeatTaskAId' }, {}, [TaskFlag.Repeat]).queue(Object.prototype, async function () {
+        Task.create('RepeatLongTaskA', { Id: 'RepeatTaskAId' }, {}, [TaskFlag.RepeatNoResponse]).queue(Object.prototype, async function () {
             await block;
             executedTasks.push(this);
             setTimeout(() => {
@@ -17,7 +17,7 @@ fdescribe('when queueing tasks given a repeat task flag and long running tasks',
                 }
             }, 1000);
         });
-        Task.create('RepeatLongTaskB', { Id: 'RepeatTaskBId' }, {}, [TaskFlag.Repeat]).queue(Object.prototype, async function () {
+        Task.create('RepeatLongTaskB', { Id: 'RepeatTaskBId' }, {}, [TaskFlag.RepeatNoResponse]).queue(Object.prototype, async function () {
             await block;
             executedTasks.push(this);
             setTimeout(() => {
@@ -26,7 +26,7 @@ fdescribe('when queueing tasks given a repeat task flag and long running tasks',
                 }
             }, 1000);
         });
-        Task.create('RepeatLongTaskC', { Id: 'RepeatTaskCId' }, {}, [TaskFlag.Repeat]).queue(Object.prototype, async function () {
+        Task.create('RepeatLongTaskC', { Id: 'RepeatTaskCId' }, {}, [TaskFlag.RepeatNoResponse]).queue(Object.prototype, async function () {
             await block;
             executedTasks.push(this);
             setTimeout(() => {

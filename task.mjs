@@ -110,7 +110,7 @@ export class Task extends TaskProperties {
     */
     complete(value) {
         const properties = privateBag.get(this);
-        if (this.hasFlag(TaskFlag.Repeat)) {
+        if (this.hasFlag(TaskFlag.RepeatNoResponse)) {
             throw new Error(`${this.toString()} is configured to run indefinitely.`);
         }
         if (properties.resolve) {
