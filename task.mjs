@@ -87,6 +87,13 @@ export class Task extends TaskProperties {
     /**
      * @returns { TaskState }
     */
+    get name() {
+        const { name } = privateBag.get(this);
+        return name;
+    }
+    /**
+     * @returns { TaskState }
+    */
     get state() {
         const { state } = privateBag.get(this);
         return state;
