@@ -170,7 +170,7 @@ export class Task extends TaskProperties {
     }
     /**
      * @returns { String }
-     */
+    */
     toString() {
         return `${this.contextId}: ${this.name}(${this.Id})`;
     }
