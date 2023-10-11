@@ -1,8 +1,8 @@
 
 import { TaskFlag } from '../lib/task-flag.mjs';
 import { Task } from '../task.mjs';
-describe('when enqueuing tasks', () => {
-    it('should run them in the order of priority task flags', async () => {
+describe('when enqueuing tasks given different priority flags', () => {
+    it('should run them in priority order', async () => {
         let taskExecuteOrder = [];
         let promises = [];
         const promiseA = Task.create('TaskA', { Id: 'TaskAId' }, {}, []).queue(Object.prototype, function () {

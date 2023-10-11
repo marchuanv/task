@@ -1,7 +1,7 @@
 import { TaskFlag } from '../lib/task-flag.mjs';
 import { TaskState } from '../lib/task-state.mjs';
 import { Task } from '../task.mjs';
-describe('when queueing tasks given a repeat not response task flag and short running tasks', () => {
+describe('when queueing tasks given a repeat no response task flag and short running tasks', () => {
     it('should run indefinitely', (done) => {
         let executedTasks = [];
         let isRepeatTaskALongRunning = false;

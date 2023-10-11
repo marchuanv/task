@@ -1,14 +1,14 @@
 import { TaskFlag } from '../lib/task-flag.mjs';
 import { TaskState } from '../lib/task-state.mjs';
 import { Task } from '../task.mjs';
-describe('when queueing tasks given a repeat not response task flag and wait for long running tasks', () => {
-    it('should run indefinitely', (done) => {
+describe('when queueing tasks given a wait for response flag on long running tasks', () => {
+    it('should wait for response', (done) => {
         let executedTasks = [];
         let isRepeatTaskALongRunning = false;
         let isRepeatTaskBLongRunning = false;
         let isRepeatTaskCLongRunning = false;
         const block = new Promise((resolve) => setTimeout(resolve, 3000));
-        Task.create('RepeatLongWaitTaskA', { Id: 'RepeatTaskAId' }, {}, [TaskFlag.RepeatNoResponse]).queue(Object.prototype, async function () {
+        Task.create('WaitLongTaskTaskA', { Id: 'RepeatTaskAId' }, {}, [TaskFlag.WaitForValidResponse]).queue(Object.prototype, async function () {
             await block;
             executedTasks.push(this);
             setTimeout(() => {
@@ -17,7 +17,7 @@ describe('when queueing tasks given a repeat not response task flag and wait for
                 }
             }, 1000);
         });
-        Task.create('RepeatLongWaitTaskB', { Id: 'RepeatTaskBId' }, {}, [TaskFlag.RepeatNoResponse]).queue(Object.prototype, async function () {
+        Task.create('WaitLongTaskTaskB', { Id: 'RepeatTaskBId' }, {}, [TaskFlag.WaitForValidResponse]).queue(Object.prototype, async function () {
             await block;
             executedTasks.push(this);
             setTimeout(() => {
@@ -26,7 +26,7 @@ describe('when queueing tasks given a repeat not response task flag and wait for
                 }
             }, 1000);
         });
-        Task.create('RepeatLongWaitTaskC', { Id: 'RepeatTaskCId' }, {}, [TaskFlag.RepeatNoResponse]).queue(Object.prototype, async function () {
+        Task.create('WaitLongTaskTaskC', { Id: 'RepeatTaskCId' }, {}, [TaskFlag.WaitForValidResponse]).queue(Object.prototype, async function () {
             await block;
             executedTasks.push(this);
             setTimeout(() => {
