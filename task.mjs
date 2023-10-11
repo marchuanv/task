@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
-import { TaskFlag } from "./lib/task-flag.mjs";
-import { TaskState } from './lib/task-state.mjs';
 import { TaskFlagGroup } from './lib/task-flag-group.mjs';
-import { TaskQueue } from './lib/task-queue.mjs';
+import { TaskFlag } from "./lib/task-flag.mjs";
 import { TaskProperties } from './lib/task-properties.mjs';
+import { TaskQueue } from './lib/task-queue.mjs';
+import { TaskState } from './lib/task-state.mjs';
 let privateBag;
 export class Task extends TaskProperties {
     /**
@@ -31,7 +31,7 @@ export class Task extends TaskProperties {
         _properties.callback = null;
         _properties.state = TaskState.Created;
         _properties.data = data;
-        _properties.history = [];
+        _properties.states = [_properties.state];
         _properties.Id = crypto.randomUUID();
         _properties.time = 0;
         _properties.dependencies = [];
@@ -87,6 +87,13 @@ export class Task extends TaskProperties {
     /**
      * @returns { TaskState }
     */
+    get contextId() {
+        const { contextId } = privateBag.get(this);
+        return contextId;
+    }
+    /**
+     * @returns { TaskState }
+    */
     get name() {
         const { name } = privateBag.get(this);
         return name;
@@ -103,18 +110,37 @@ export class Task extends TaskProperties {
     */
     complete(value) {
         const properties = privateBag.get(this);
+        if (this.hasFlag(TaskFlag.Repeat)) {
+            throw new Error(`${this.toString()} is configured to run indefinitely.`);
+        }
         if (properties.resolve) {
             properties.value = value;
             properties.resolve(properties.value);
             if (properties.value === undefined || properties.value === null) {
                 properties.state = TaskState.PromiseResolvedNoResults;
+                properties.states.push(properties.state);
             } else {
                 properties.state = TaskState.PromiseResolvedWithResults;
+                properties.states.push(properties.state);
             }
         } else {
             properties.state = TaskState.Error;
+            properties.states.push(properties.state);
             properties.error = new Error(`critical error, complete task was called without a promise resolve function`);
         }
+    }
+    /**
+    * @param { TaskState } state
+    * @returns { Boolean }
+   */
+    hadState(state) {
+        const { states } = privateBag.get(this);
+        for (const _state of states) {
+            if (_state === state) {
+                return true;
+            }
+        }
+        return false;
     }
     /**
      * @param { TaskFlag } flag
@@ -141,5 +167,11 @@ export class Task extends TaskProperties {
             }
         }
         return false;
+    }
+    /**
+     * @returns { String }
+     */
+    toString() {
+        return `${this.contextId}: ${this.name}(${this.Id})`;
     }
 }

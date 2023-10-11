@@ -10,8 +10,8 @@
         "url": "http://github.com/marchuanv/task"
     },
     "engines": {
-        "npm": ">=8.19.4",
-        "node": ">=16.20.2"
+        "npm": ">=8.1.2",
+        "node": ">=16.14.2"
     },
     "files": [
         "lib"
