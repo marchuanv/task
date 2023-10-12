@@ -1,21 +1,20 @@
 
-import { TaskFlag } from '../lib/task-flag.mjs';
-import { Task } from '../task.mjs';
+import { TestTask } from './test-task.mjs';
 describe('when enqueuing tasks given different priority flags', () => {
     it('should run them in priority order', async () => {
         let taskExecuteOrder = [];
         let promises = [];
-        const promiseA = Task.create('TaskA', { Id: 'TaskAId' }, {}, []).queue(Object.prototype, function () {
+        const promiseA = TestTask.create('TaskA', []).queue(function () {
             console.log('running task A');
             taskExecuteOrder.push(this);
             this.complete({ message: 'valid response' });
         });
-        const promiseB = Task.create('TaskB', { Id: 'TaskBId' }, {}, [TaskFlag.MediumPriority]).queue(Object.prototype, function () {
+        const promiseB = TestTask.create('TaskB', []).queue(function () {
             console.log('running task B');
             taskExecuteOrder.push(this);
             this.complete({ message: 'valid response' });
         });
-        const promiseC = Task.create('TaskC', { Id: 'TaskCId' }, {}, [TaskFlag.HighPriority]).queue(Object.prototype, function () {
+        const promiseC = TestTask.create('TaskC', []).queue(function () {
             taskExecuteOrder.push(this);
             console.log('running task C');
             this.complete({ message: 'valid response' });

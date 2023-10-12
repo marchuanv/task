@@ -47,10 +47,7 @@ export class Task extends TaskProperties {
             _properties.flags.push(TaskFlag.HandleErrors);
         }
         if (!this.hasFlagGroup(TaskFlagGroup.Run)) {
-            _properties.flags.push(TaskFlag.OnceOff);
-        }
-        if (!this.hasFlagGroup(TaskFlagGroup.Response)) {
-            _properties.flags.push(TaskFlag.ValidResponse);
+            _properties.flags.push(TaskFlag.OnceOffDataResolve);
         }
     }
     /**

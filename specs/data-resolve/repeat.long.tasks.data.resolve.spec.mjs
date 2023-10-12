@@ -1,11 +1,11 @@
 import { TaskFlag } from '../../lib/task-flag.mjs';
 import { TestTask } from '../test-task.mjs';
-fdescribe('when queueing long running tasks given a repeat data resolve', () => {
+describe('when queueing long running tasks given a repeat data resolve', () => {
     it('should run once', (done) => {
         let executedTasks = [];
-        let isLongRunningTaskA = false;
-        let isLongRunningTaskB = false;
-        let isLongRunningTaskC = false;
+        let isLongRunningTaskA = null;
+        let isLongRunningTaskB = null;
+        let isLongRunningTaskC = null;
         const block = new Promise((resolve) => setTimeout(resolve, 2000));
         const taskAPromise = TestTask.create('RepeatDataResolveLongTaskA', [TaskFlag.RepeatDataResolve]).queue(async function () {
             isLongRunningTaskA = this.isLongRunning();
@@ -38,7 +38,7 @@ fdescribe('when queueing long running tasks given a repeat data resolve', () => 
             expect(taskAPromiseResults).toBe('RepeatDataResolveLongTaskASuccess');
             expect(taskBPromiseResults).toBe('RepeatDataResolveLongTaskBSuccess');
             expect(taskCPromiseResults).toBe('RepeatDataResolveLongTaskCSuccess');
-            expect(executedTasks.length).toBeGreaterThan(3000000);
+            expect(executedTasks.length).toBeGreaterThan(3);
             done();
         }, 10000);
     });

@@ -3,9 +3,9 @@ import { TestTask } from '../test-task.mjs';
 describe('when queueing long running tasks given a once off data resolve', () => {
     it('should run once', (done) => {
         let executedTasks = [];
-        let isLongRunningTaskA = false;
-        let isLongRunningTaskB = false;
-        let isLongRunningTaskC = false;
+        let isLongRunningTaskA = null;
+        let isLongRunningTaskB = null;
+        let isLongRunningTaskC = null;
         const block = new Promise((resolve) => setTimeout(resolve, 2000));
         const taskAPromise = TestTask.create('OnceOffDataResolveLongTaskA', [TaskFlag.OnceOffDataResolve]).queue(async function () {
             isLongRunningTaskA = this.isLongRunning();
