@@ -1,7 +1,7 @@
 import { TaskFlag } from '../lib/task-flag.mjs';
 import { TaskState } from '../lib/task-state.mjs';
 import { Task } from '../task.mjs';
-fdescribe('when queueing tasks given a wait for response flag on long running tasks', () => {
+describe('when queueing tasks given a wait for response flag on long running tasks', () => {
     it('should wait for response', async () => {
 
         let executedTasks = [];
