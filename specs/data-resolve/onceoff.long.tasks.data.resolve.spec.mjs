@@ -1,11 +1,12 @@
 import { TaskFlag } from '../../lib/task-flag.mjs';
 import { TestTask } from '../test-task.mjs';
-describe('when queueing long running tasks given a once off data resolve', () => {
+const suite = describe('when queueing long running tasks given a once off data resolve', () => {
     it('should run once', (done) => {
-        let executedTasks = [];
         let isLongRunningTaskA = null;
         let isLongRunningTaskB = null;
         let isLongRunningTaskC = null;
+        const executedTasks = [];
+        process.specs.set(suite, executedTasks);
         const block = new Promise((resolve) => setTimeout(resolve, 2000));
         const taskAPromise = TestTask.create('OnceOffDataResolveLongTaskA', [TaskFlag.OnceOffDataResolve]).queue(async function () {
             isLongRunningTaskA = this.isLongRunning();

@@ -1,8 +1,9 @@
 import { TaskFlag } from '../../lib/task-flag.mjs';
 import { TestTask } from '../test-task.mjs';
-describe('when queueing long running tasks given a repeat no data resolve', () => {
+const suite = describe('when queueing long running tasks given a repeat no data resolve', () => {
     it('should run indefinitely', (done) => {
         let executedTasks = [];
+        process.specs.set(suite, executedTasks);
         let isLongRunningTaskA = null;
         let isLongRunningTaskB = null;
         let isLongRunningTaskC = null;

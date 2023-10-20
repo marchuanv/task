@@ -1,8 +1,9 @@
 
 import { TestTask } from './test-task.mjs';
-describe('when enqueuing tasks given different priority flags', () => {
+const suite = describe('when enqueuing tasks given different priority flags', () => {
     it('should run them in priority order', async () => {
         let taskExecuteOrder = [];
+        process.specs.set(suite, taskExecuteOrder);
         let promises = [];
         const promiseA = TestTask.create('TaskA', []).queue(function () {
             console.log('running task A');
