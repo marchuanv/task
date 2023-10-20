@@ -149,6 +149,11 @@ export class Task extends TaskProperties {
         }
         return false;
     }
+    get flags() {
+        const { flags } = privateBag.get(this);
+        const _flags = flags.map(f => f.toString());
+        return _flags;
+    }
     /**
      * @param { TaskFlagGroup } flagGroup
      * @returns { Boolean }
