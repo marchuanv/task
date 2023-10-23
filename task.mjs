@@ -33,7 +33,8 @@ export class Task extends TaskProperties {
         _properties.data = data;
         _properties.states = [_properties.state];
         _properties.Id = crypto.randomUUID();
-        _properties.time = 0;
+        _properties.startTime = 0;
+        _properties.endTime = 0;
         _properties.dependencies = [];
         _properties.stack = null;
         super((_privateBag) => {

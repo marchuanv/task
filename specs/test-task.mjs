@@ -24,19 +24,25 @@ export class TestTask extends Task {
      * @param { Function } callback
      * @returns { Promise<T> }
     */
-    queue(callback) {
+    queue(timeoutMill, callback) {
         process.specs.get(this.suite).push(this);
-        return super.queue(Object.prototype, callback);
-    }
-    isLongRunning(timeoutMill) {
-        return new Promise((resolve) => {
-            let _isLongRunning = false;
-            setTimeout(() => {
-                if (super.hadState(TaskState.LongRunning)) {
-                    _isLongRunning = true;
-                }
-                resolve(_isLongRunning);
-            }, timeoutMill);
+        return new Promise(async (resolve, rejected) => {
+            try {
+                const results = await super.queue(Object.prototype, callback);
+                let isLongRunning = false;
+                setTimeout(async () => {
+                    isLongRunning = super.hadState(TaskState.LongRunning);
+                    resolve({ results, isLongRunning });
+                }, timeoutMill);
+            } catch (error) {
+                rejected(error);
+            }
         });
     }
+}
+
+function getPromiseState(p) {
+    const t = {};
+    return Promise.race([p, t])
+        .then(v => (v === t) ? "pending" : "fulfilled", () => "rejected");
 }
