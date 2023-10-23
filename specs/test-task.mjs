@@ -32,7 +32,13 @@ export class TestTask extends Task {
                 const results = await super.queue(Object.prototype, callback);
                 setTimeout(async () => {
                     const isLongRunning = super.hadState(TaskState.LongRunning);
-                    resolve({ results, isLongRunning, enqueueCount: this.enqueueCount() });
+                    resolve({
+                        results,
+                        isLongRunning,
+                        enqueueCount: this.enqueueCount(),
+                        taskStartTime: this.startTime(),
+                        taskEndTime: this.endTime(),
+                    });
                 }, (timeoutMill + 1000));
             } catch (error) {
                 rejected(error);

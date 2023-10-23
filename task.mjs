@@ -181,4 +181,18 @@ export class Task extends TaskProperties {
         const { enqueueCount } = privateBag.get(this);
         return enqueueCount;
     }
+    /**
+     * @returns { Number }
+    */
+    startTime() {
+        const { startTime } = privateBag.get(this);
+        return startTime;
+    }
+    /**
+     * @returns { Number }
+    */
+    endTime() {
+        const { endTime } = privateBag.get(this);
+        return endTime;
+    }
 }
