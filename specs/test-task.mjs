@@ -1,5 +1,6 @@
 import { TaskState } from "../lib/task-state.mjs";
 import { Task } from "../task.mjs";
+const nanoSecTimeout = 2000000000; //2 seconds
 export class TestTask extends Task {
     /**
      * @param { Object } testSuite
@@ -29,20 +30,36 @@ export class TestTask extends Task {
         return new Promise(async (resolve, rejected) => {
             try {
                 const results = await super.queue(Object.prototype, callback);
-                let isLongRunning = false;
                 setTimeout(async () => {
-                    isLongRunning = super.hadState(TaskState.LongRunning);
-                    resolve({ results, isLongRunning });
-                }, timeoutMill);
+                    const isLongRunning = super.hadState(TaskState.LongRunning);
+                    resolve({ results, isLongRunning, enqueueCount: this.enqueueCount() });
+                }, (timeoutMill + 1000));
             } catch (error) {
                 rejected(error);
             }
         });
     }
-}
-
-function getPromiseState(p) {
-    const t = {};
-    return Promise.race([p, t])
-        .then(v => (v === t) ? "pending" : "fulfilled", () => "rejected");
+    simulateDelay() {
+        const startTime = Number(process.hrtime.bigint());
+        return new Promise((resolve) => {
+            const isTimeout = () => {
+                const endTime = Number(process.hrtime.bigint());
+                const diff = (endTime - startTime);
+                if (diff >= nanoSecTimeout) {
+                    return true;
+                }
+                return false;
+            };
+            const recurseCheck = () => {
+                setImmediate(() => {
+                    if (isTimeout()) {
+                        resolve();
+                    } else {
+                        recurseCheck();
+                    }
+                });
+            }
+            recurseCheck();
+        });
+    }
 }

@@ -35,6 +35,7 @@ export class Task extends TaskProperties {
         _properties.Id = crypto.randomUUID();
         _properties.startTime = 0;
         _properties.endTime = 0;
+        _properties.enqueueCount = 0;
         _properties.dependencies = [];
         _properties.stack = null;
         super((_privateBag) => {
@@ -110,7 +111,6 @@ export class Task extends TaskProperties {
         const properties = privateBag.get(this);
         if (properties.resolve) {
             properties.value = value;
-            properties.resolve(properties.value);
             if (properties.value === undefined || properties.value === null) {
                 properties.state = TaskState.PromiseResolvedNoResults;
                 properties.states.push(properties.state);
@@ -173,5 +173,12 @@ export class Task extends TaskProperties {
     */
     toString() {
         return `${this.contextId}: ${this.name}(${this.Id})`;
+    }
+    /**
+     * @returns { Number }
+    */
+    enqueueCount() {
+        const { enqueueCount } = privateBag.get(this);
+        return enqueueCount;
     }
 }
