@@ -1,6 +1,6 @@
 import { TaskFlag } from '../../lib/task-flag.mjs';
 import { TestTask } from '../test-task.mjs';
-const suite = describe('when queueing short running tasks given a once off no data resolve', () => {
+const suite = describe('when queueing a short running tasks given a once off no data resolve', () => {
     it('should run once', async () => {
         const promises = [
             TestTask.create(suite, 'OnceOffNoDataResolveShortTaskA', [TaskFlag.OnceOffNoDataResolve]).queue(0, async function () { }),

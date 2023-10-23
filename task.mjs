@@ -38,6 +38,8 @@ export class Task extends TaskProperties {
         _properties.enqueueCount = 0;
         _properties.dependencies = [];
         _properties.stack = null;
+        _properties.reject = () => { console.log('queue the task first'); };
+        _properties.resolve = () => { console.log('queue the task first'); };
         super((_privateBag) => {
             privateBag = _privateBag;
         });
@@ -71,8 +73,9 @@ export class Task extends TaskProperties {
         const properties = privateBag.get(this);
         properties.stack = (new Error()).stack;
         properties.callback = callback;
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             properties.resolve = resolve;
+            properties.reject = reject;
             TaskQueue.enqueue(this);
         });
     }

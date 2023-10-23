@@ -1,6 +1,6 @@
 import { TaskFlag } from '../../lib/task-flag.mjs';
 import { TestTask } from '../test-task.mjs';
-const suite = describe('when queueing long running tasks given a once off data resolve', () => {
+const suite = describe('when queueing a long running tasks given a once off data resolve', () => {
     it('should run once', async () => {
         const promises = [
             TestTask.create(suite, 'OnceOffDataResolveLongTaskA', [TaskFlag.OnceOffDataResolve]).queue(0, async function () {

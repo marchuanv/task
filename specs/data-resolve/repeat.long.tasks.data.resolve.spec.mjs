@@ -1,6 +1,6 @@
 import { TaskFlag } from '../../lib/task-flag.mjs';
 import { TestTask } from '../test-task.mjs';
-const suite = describe('when queueing long running tasks given a repeat data resolve', () => {
+const suite = describe('when queueing a long running tasks given a repeat data resolve', () => {
     it('should run indefinitely', async () => {
         const promises = [
             TestTask.create(suite, 'RepeatDataResolveLongTaskA', [TaskFlag.RepeatDataResolve]).queue(0, async function () {
