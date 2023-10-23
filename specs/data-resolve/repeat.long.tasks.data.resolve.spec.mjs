@@ -2,31 +2,27 @@ import { TaskFlag } from '../../lib/task-flag.mjs';
 import { TestTask } from '../test-task.mjs';
 const suite = describe('when queueing long running tasks given a repeat data resolve', () => {
     it('should run once', (done) => {
-        let executedTasks = [];
-        process.specs.set(suite, executedTasks);
         let isLongRunningTaskA = null;
         let isLongRunningTaskB = null;
         let isLongRunningTaskC = null;
         const block = new Promise((resolve) => setTimeout(resolve, 2000));
-        const taskAPromise = TestTask.create('RepeatDataResolveLongTaskA', [TaskFlag.RepeatDataResolve]).queue(async function () {
-            isLongRunningTaskA = this.isLongRunning();
-            executedTasks.push(this);
+        const taskAPromise = TestTask.create(suite, 'RepeatDataResolveLongTaskA', [TaskFlag.RepeatDataResolve]).queue(async function () {
+            isLongRunningTaskA = this.isLongRunning(3000);
             await block;
             this.complete('RepeatDataResolveLongTaskASuccess');
         });
-        const taskBPromise = TestTask.create('RepeatDataResolveLongTaskB', [TaskFlag.RepeatDataResolve]).queue(async function () {
-            isLongRunningTaskB = this.isLongRunning();
-            executedTasks.push(this);
+        const taskBPromise = TestTask.create(suite, 'RepeatDataResolveLongTaskB', [TaskFlag.RepeatDataResolve]).queue(async function () {
+            isLongRunningTaskB = this.isLongRunning(3000);
             await block;
             this.complete('RepeatDataResolveLongTaskBSuccess');
         });
-        const taskCPromise = TestTask.create('RepeatDataResolveLongTaskC', [TaskFlag.RepeatDataResolve]).queue(async function () {
-            isLongRunningTaskC = this.isLongRunning();
-            executedTasks.push(this);
+        const taskCPromise = TestTask.create(suite, 'RepeatDataResolveLongTaskC', [TaskFlag.RepeatDataResolve]).queue(async function () {
+            isLongRunningTaskC = this.isLongRunning(3000);
             await block;
             this.complete('RepeatDataResolveLongTaskCSuccess');
         });
         setTimeout(async () => {
+            const executedTasks = process.specs.get(suite);
             const _isLongRunningTaskA = await isLongRunningTaskA;
             const _isLongRunningTaskB = await isLongRunningTaskB;
             const _isLongRunningTaskC = await isLongRunningTaskC;
@@ -44,3 +40,4 @@ const suite = describe('when queueing long running tasks given a repeat data res
         }, 10000);
     });
 });
+process.specs.set(suite, []);
