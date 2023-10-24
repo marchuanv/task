@@ -35,7 +35,7 @@ export class TestTask extends Task {
                     resolve({
                         results,
                         isLongRunning,
-                        enqueueCount: this.enqueueCount(),
+                        enqueueCount: this.enqueueCount,
                         taskStartTime: this.startTime(),
                         taskEndTime: this.endTime(),
                     });

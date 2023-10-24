@@ -180,7 +180,7 @@ export class Task extends TaskProperties {
     /**
      * @returns { Number }
     */
-    enqueueCount() {
+    get enqueueCount() {
         const { enqueueCount } = privateBag.get(this);
         return enqueueCount;
     }
