@@ -3,39 +3,39 @@ import { TaskFlag } from '../lib/task-flag.mjs';
 import { TestTask } from './test-task.mjs';
 const suite = describe('when enqueuing tasks given different priority flags', () => {
     it('should run them in priority order', async () => {
-        const taskAMessage = { message: 'valid response from Task A' };
-        const taskBMessage = { message: 'valid response from Task B' };
-        const taskCMessage = { message: 'valid response from Task C' };
+        const taskAData = { message: 'valid response from Task A' };
+        const taskBData = { message: 'valid response from Task B' };
+        const taskCData = { message: 'valid response from Task C' };
         let promises = [
-            TestTask.create(suite, 'TaskA', [TaskFlag.LowPriority]).queue(0, function () {
-                this.complete(taskAMessage);
+            TestTask.create(suite, 'TaskA', [TaskFlag.LowPriority]).run(0, function () {
+                this.complete(taskAData);
             }),
-            TestTask.create(suite, 'TaskB', [TaskFlag.MediumPriority]).queue(0, function () {
-                this.complete(taskBMessage);
+            TestTask.create(suite, 'TaskB', [TaskFlag.MediumPriority]).run(0, function () {
+                this.complete(taskBData);
             }),
-            TestTask.create(suite, 'TaskC', [TaskFlag.HighPriority]).queue(0, function () {
-                this.complete(taskCMessage);
+            TestTask.create(suite, 'TaskC', [TaskFlag.HighPriority]).run(0, function () {
+                this.complete(taskCData);
             })
         ];
 
         const results = await Promise.all(promises);
-        const [resultsA, resultsB, resultsC] = results;
+        const [taskA, taskB, taskC] = results;
 
-        expect(resultsA.isLongRunning).toBeFalse();
-        expect(resultsB.isLongRunning).toBeFalse();
-        expect(resultsC.isLongRunning).toBeFalse();
+        expect(taskA.isLongRunning).toBeFalse();
+        expect(taskB.isLongRunning).toBeFalse();
+        expect(taskC.isLongRunning).toBeFalse();
 
-        expect(JSON.stringify(resultsA.results)).toBe(JSON.stringify(taskAMessage));
-        expect(JSON.stringify(resultsB.results)).toBe(JSON.stringify(taskBMessage));
-        expect(JSON.stringify(resultsC.results)).toBe(JSON.stringify(taskCMessage));
+        expect(JSON.stringify(taskA.data)).toBe(JSON.stringify(taskAData));
+        expect(JSON.stringify(taskB.data)).toBe(JSON.stringify(taskBData));
+        expect(JSON.stringify(taskC.data)).toBe(JSON.stringify(taskCData));
 
-        expect(resultsA.enqueueCount).toBe(1);
-        expect(resultsB.enqueueCount).toBe(1);
-        expect(resultsC.enqueueCount).toBe(1);
+        expect(taskA.enqueueCount).toBe(1);
+        expect(taskB.enqueueCount).toBe(1);
+        expect(taskC.enqueueCount).toBe(1);
 
-        expect(resultsC.taskStartTime).toBeLessThan(resultsB.taskStartTime);
-        expect(resultsC.taskStartTime).toBeLessThan(resultsA.taskStartTime);
-        expect(resultsB.taskStartTime).toBeLessThan(resultsA.taskStartTime);
+        expect(taskC.taskStartTime).toBeLessThan(taskB.taskStartTime);
+        expect(taskC.taskStartTime).toBeLessThan(taskA.taskStartTime);
+        expect(taskB.taskStartTime).toBeLessThan(taskA.taskStartTime);
     });
 });
 process.specs.set(suite, []);

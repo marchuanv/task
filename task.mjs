@@ -1,11 +1,10 @@
 import crypto from 'node:crypto';
 import { TaskFlagGroup } from './lib/task-flag-group.mjs';
 import { TaskFlag } from "./lib/task-flag.mjs";
-import { TaskProperties } from './lib/task-properties.mjs';
 import { TaskQueue } from './lib/task-queue.mjs';
 import { TaskState } from './lib/task-state.mjs';
-let privateBag;
-export class Task extends TaskProperties {
+let privateBag = new WeakMap();
+export class Task {
     /**
      * @param { String } name
      * @param { Object } context
@@ -24,10 +23,11 @@ export class Task extends TaskProperties {
         }
         let _properties = {};
         _properties.context = context;
+        _properties.data = null;
+        _properties.error = null;
         _properties.name = `${context.constructor.name}_${name}`;
         _properties.contextId = context.Id;
         _properties.flags = flags;
-        _properties.error = null;
         _properties.callback = null;
         _properties.state = TaskState.Created;
         _properties.data = data;
@@ -40,9 +40,6 @@ export class Task extends TaskProperties {
         _properties.stack = null;
         _properties.reject = () => { console.log('queue the task first'); };
         _properties.resolve = () => { console.log('queue the task first'); };
-        super((_privateBag) => {
-            privateBag = _privateBag;
-        });
         privateBag.set(this, _properties);
         if (!this.hasFlagGroup(TaskFlagGroup.Priority)) {
             _properties.flags.push(TaskFlag.LowPriority);
@@ -69,14 +66,15 @@ export class Task extends TaskProperties {
      * @param { Function } callback
      * @returns { Promise<T> }
     */
-    queue(type, callback) {
+    run(type, callback) {
         const properties = privateBag.get(this);
         properties.stack = (new Error()).stack;
         properties.callback = callback;
         return new Promise((resolve, reject) => {
             properties.resolve = resolve;
             properties.reject = reject;
-            TaskQueue.enqueue(this);
+            Object.seal(properties);
+            TaskQueue.enqueue(this, properties);
         });
     }
     /**
@@ -110,11 +108,11 @@ export class Task extends TaskProperties {
     /**
      * @param { Object }
     */
-    complete(value) {
+    complete(data) {
         const properties = privateBag.get(this);
         if (properties.resolve) {
-            properties.value = value;
-            if (properties.value === undefined || properties.value === null) {
+            properties.data = data;
+            if (properties.data === undefined || properties.data === null) {
                 properties.state = TaskState.PromiseResolvedNoResults;
                 properties.states.push(properties.state);
             } else {
@@ -204,5 +202,12 @@ export class Task extends TaskProperties {
     get error() {
         const { error } = privateBag.get(this);
         return error;
+    }
+    /**
+     * @returns { Object }
+    */
+    get data() {
+        const { data } = privateBag.get(this);
+        return data;
     }
 }

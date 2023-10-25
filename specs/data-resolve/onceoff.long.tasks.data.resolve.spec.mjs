@@ -3,34 +3,34 @@ import { TestTask } from '../test-task.mjs';
 const suite = describe('when queueing a long running tasks given a once off data resolve', () => {
     it('should run once', async () => {
         const promises = [
-            TestTask.create(suite, 'OnceOffDataResolveLongTaskA', [TaskFlag.OnceOffDataResolve]).queue(0, async function () {
+            TestTask.create(suite, 'OnceOffDataResolveLongTaskA', [TaskFlag.OnceOffDataResolve]).run(0, async function () {
                 await this.simulateDelay();
                 this.complete('OnceOffDataResolveLongTaskASuccess');
             }),
-            TestTask.create(suite, 'OnceOffDataResolveLongTaskB', [TaskFlag.OnceOffDataResolve]).queue(0, async function () {
+            TestTask.create(suite, 'OnceOffDataResolveLongTaskB', [TaskFlag.OnceOffDataResolve]).run(0, async function () {
                 await this.simulateDelay();
                 this.complete('OnceOffDataResolveLongTaskBSuccess');
             }),
-            TestTask.create(suite, 'OnceOffDataResolveLongTaskC', [TaskFlag.OnceOffDataResolve]).queue(0, async function () {
+            TestTask.create(suite, 'OnceOffDataResolveLongTaskC', [TaskFlag.OnceOffDataResolve]).run(0, async function () {
                 await this.simulateDelay();
                 this.complete('OnceOffDataResolveLongTaskCSuccess');
             })
         ];
         const results = await Promise.all(promises);
 
-        const [resultsA, resultsB, resultsC] = results;
+        const [taskA, taskB, taskC] = results;
 
-        expect(resultsA.isLongRunning).toBeTrue();
-        expect(resultsB.isLongRunning).toBeTrue();
-        expect(resultsC.isLongRunning).toBeTrue();
+        expect(taskA.isLongRunning).toBeTrue();
+        expect(taskB.isLongRunning).toBeTrue();
+        expect(taskC.isLongRunning).toBeTrue();
 
-        expect(resultsA.results).toBe('OnceOffDataResolveLongTaskASuccess');
-        expect(resultsB.results).toBe('OnceOffDataResolveLongTaskBSuccess');
-        expect(resultsC.results).toBe('OnceOffDataResolveLongTaskCSuccess');
+        expect(taskA.data).toBe('OnceOffDataResolveLongTaskASuccess');
+        expect(taskB.data).toBe('OnceOffDataResolveLongTaskBSuccess');
+        expect(taskC.data).toBe('OnceOffDataResolveLongTaskCSuccess');
 
-        expect(resultsA.enqueueCount).toBe(1);
-        expect(resultsB.enqueueCount).toBe(1);
-        expect(resultsC.enqueueCount).toBe(1);
+        expect(taskA.enqueueCount).toBe(1);
+        expect(taskB.enqueueCount).toBe(1);
+        expect(taskC.enqueueCount).toBe(1);
     });
 });
 process.specs.set(suite, []);

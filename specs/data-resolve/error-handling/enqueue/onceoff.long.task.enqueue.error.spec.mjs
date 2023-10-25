@@ -1,13 +1,11 @@
 import { TaskFlag } from '../../../../lib/task-flag.mjs';
 import { Task } from '../../../../task.mjs';
 import { TestTask } from '../../../test-task.mjs';
-const suite = describe('when a once-off short task is resolved with null given an error', () => {
+const suite = describe('when a once-off long task is enqueued given an error', () => {
 
     let promise;
     beforeAll(async () => {
-        promise = TestTask.create(suite, 'LongTaskOnceOffResolvedWithNull', [TaskFlag.OnceOffDataResolve]).run(0, async function () {
-            this.complete(null);
-        });
+        promise = TestTask.create(suite, 'LongTaskOnceOffEnqueueError', [TaskFlag.OnceOffDataResolve]).run();
     });
 
     it('should handle the error', (done) => {
@@ -21,9 +19,9 @@ const suite = describe('when a once-off short task is resolved with null given a
             expect(task).toBeInstanceOf(Task);
             expect(task.error).toBeDefined();
             expect(task.error).not.toBeNull();
-            expect(task.error.message).toContain('task is configured to resolve with data, but was not resolved with valid data');
-            expect(task.isLongRunning).toBeFalse();
-            expect(task.enqueueCount).toBe(1);
+            expect(task.error.message).toContain('was not queued, no callback function');
+            expect(task.isLongRunning).toBeFalse(); //the task should never run
+            expect(task.enqueueCount).toBe(0);
             done();
         });
     });

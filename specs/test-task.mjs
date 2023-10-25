@@ -25,10 +25,10 @@ export class TestTask extends Task {
      * @param { Function } callback
      * @returns { Promise<T> }
     */
-    queue(timeoutMill, callback) {
+    run(timeoutMill, callback) {
         process.specs.get(this.suite).push(this);
         return new Promise(async (resolve, rejected) => {
-            super.queue(Object.prototype, callback).then(() => {
+            super.run(Object.prototype, callback).then(() => {
                 setTimeout(async () => {
                     resolve(this);
                 }, (timeoutMill + 1000));
