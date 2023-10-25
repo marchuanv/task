@@ -187,15 +187,22 @@ export class Task extends TaskProperties {
     /**
      * @returns { Number }
     */
-    startTime() {
+    get startTime() {
         const { startTime } = privateBag.get(this);
         return startTime;
     }
     /**
      * @returns { Number }
     */
-    endTime() {
+    get endTime() {
         const { endTime } = privateBag.get(this);
         return endTime;
+    }
+    /**
+     * @returns { Error }
+    */
+    get error() {
+        const { error } = privateBag.get(this);
+        return error;
     }
 }

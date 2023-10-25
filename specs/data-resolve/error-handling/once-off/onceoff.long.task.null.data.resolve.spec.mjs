@@ -1,19 +1,32 @@
 import { TaskFlag } from '../../../../lib/task-flag.mjs';
 import { TestTask } from '../../../test-task.mjs';
-const suite = describe('when a once-off long task resolve with null given error handling', () => {
-    it('should handle the error and terminate gracefully', async () => {
-        let _error = null;
-        try {
-            await TestTask.create(suite, 'LongOnceOffNullDataResolveTaskError', [TaskFlag.OnceOffDataResolve]).queue(0, async function () {
-                await this.simulateDelay();
-                this.complete(null);
-            });
-        } catch (error) {
-            _error = error;
-        } finally {
-            expect(_error).toBeDefined();
-            expect(_error.message).toContain('task is configured to resolve with data, but was not resolved with valid data');
-        }
+const suite = describe('when a once-off long task is resolve with null given error handling', () => {
+
+    let promise;
+    beforeAll(async () => {
+        promise = TestTask.create(suite, 'LongTaskOnceOffResolvedWithNull', [TaskFlag.OnceOffDataResolve]).queue(0, async function () {
+            await this.simulateDelay();
+            this.complete(null);
+        });
+    });
+
+    it('should handle the error and terminate the once-off task', (done) => {
+        promise.then((task) => {
+            setTimeout(async () => {
+                expect(task.error).toBeDefined();
+                expect(task.error.message).toContain('task is configured to resolve with data, but was not resolved with valid data');
+                expect(task.isLongRunning).toBeTrue();
+                expect(task.enqueueCount).toBe(1);
+                fail('expected the task promise to be rejected and not resolved');
+                done();
+            }, 2000);
+        }).catch((task) => {
+            expect(task.error).toBeDefined();
+            expect(task.error.message).toContain('task is configured to resolve with data, but was not resolved with valid data');
+            expect(task.isLongRunning).toBeTrue();
+            expect(task.enqueueCount).toBe(1);
+            done();
+        });
     });
 });
 process.specs.set(suite, []);

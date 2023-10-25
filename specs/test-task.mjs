@@ -28,21 +28,13 @@ export class TestTask extends Task {
     queue(timeoutMill, callback) {
         process.specs.get(this.suite).push(this);
         return new Promise(async (resolve, rejected) => {
-            try {
-                const results = await super.queue(Object.prototype, callback);
+            super.queue(Object.prototype, callback).then(() => {
                 setTimeout(async () => {
-                    const isLongRunning = super.hadState(TaskState.LongRunning);
-                    resolve({
-                        results,
-                        isLongRunning,
-                        enqueueCount: this.enqueueCount,
-                        taskStartTime: this.startTime(),
-                        taskEndTime: this.endTime(),
-                    });
+                    resolve(this);
                 }, (timeoutMill + 1000));
-            } catch (error) {
-                rejected(error);
-            }
+            }).catch(() => {
+                rejected(this);
+            });
         });
     }
     simulateDelay() {
@@ -67,5 +59,11 @@ export class TestTask extends Task {
             }
             recurseCheck();
         });
+    }
+    /**
+     * @returns { Boolean }
+     */
+    get isLongRunning() {
+        return super.hadState(TaskState.LongRunning);
     }
 }
