@@ -33,9 +33,9 @@ const suite = describe('when enqueuing tasks given different priority flags', ()
         expect(taskB.enqueueCount).toBe(1);
         expect(taskC.enqueueCount).toBe(1);
 
-        expect(taskC.taskStartTime).toBeLessThan(taskB.taskStartTime);
-        expect(taskC.taskStartTime).toBeLessThan(taskA.taskStartTime);
-        expect(taskB.taskStartTime).toBeLessThan(taskA.taskStartTime);
+        expect(taskC.startTime).toBeLessThan(taskB.startTime);
+        expect(taskC.startTime).toBeLessThan(taskA.startTime);
+        expect(taskB.startTime).toBeLessThan(taskA.startTime);
     });
 });
 process.specs.set(suite, []);

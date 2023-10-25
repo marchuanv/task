@@ -1,7 +1,7 @@
-import { TaskFlag } from '../../../../lib/task-flag.mjs';
-import { Task } from '../../../../task.mjs';
-import { TestTask } from '../../../test-task.mjs';
-const suite = fdescribe('when a repeating long task is enqueued given an error', () => {
+import { TaskFlag } from '../../lib/task-flag.mjs';
+import { Task } from '../../task.mjs';
+import { TestTask } from '../test-task.mjs';
+const suite = describe('when a repeating long task is enqueued given an error', () => {
 
     let promise;
     beforeAll(async () => {

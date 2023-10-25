@@ -1,6 +1,6 @@
-import { TaskFlag } from '../../../../lib/task-flag.mjs';
-import { Task } from '../../../../task.mjs';
-import { TestTask } from '../../../test-task.mjs';
+import { TaskFlag } from '../../lib/task-flag.mjs';
+import { Task } from '../../task.mjs';
+import { TestTask } from '../test-task.mjs';
 const suite = describe('when a once-off long task is enqueued given an error', () => {
 
     let promise;
