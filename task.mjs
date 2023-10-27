@@ -1,6 +1,6 @@
-import crypto from 'node:crypto';
 import { TaskFlagGroup } from './lib/task-flag-group.mjs';
 import { TaskFlag } from "./lib/task-flag.mjs";
+import { TaskProperties } from "./lib/task-properties.mjs";
 import { TaskQueue } from './lib/task-queue.mjs';
 import { TaskState } from './lib/task-state.mjs';
 let privateBag = new WeakMap();
@@ -9,57 +9,33 @@ export class Task {
      * @param { String } name
      * @param { Object } context
      * @param { Object } data
+     * @param { Object } timeoutMilli
      * @param { Array<TaskFlag> } flags
     */
-    constructor(name, context, data, flags = []) {
-        if (!name) {
-            throw new Error(`no name argument`);
-        }
-        if (!context) {
-            throw new Error(`no context argument`);
-        }
-        if (!context.Id) {
-            throw new Error(`context argument does not have an Id field.`);
-        }
-        let _properties = {};
-        _properties.context = context;
-        _properties.data = null;
-        _properties.error = null;
-        _properties.name = `${context.constructor.name}_${name}`;
-        _properties.contextId = context.Id;
-        _properties.flags = flags;
-        _properties.callback = null;
-        _properties.state = TaskState.Created;
-        _properties.data = data;
-        _properties.states = [_properties.state];
-        _properties.Id = crypto.randomUUID();
-        _properties.startTime = 0;
-        _properties.endTime = 0;
-        _properties.enqueueCount = 0;
-        _properties.dependencies = [];
-        _properties.stack = null;
-        _properties.reject = () => { console.log('queue the task first'); };
-        _properties.resolve = () => { console.log('queue the task first'); };
-        privateBag.set(this, _properties);
+    constructor(name, context, data, timeoutMilli, flags = []) {
+        const properties = new TaskProperties(name, context, data, timeoutMilli, flags, this);
+        Object.seal(properties);
+        privateBag.set(this, properties);
         if (!this.hasFlagGroup(TaskFlagGroup.Priority)) {
-            _properties.flags.push(TaskFlag.LowPriority);
+            properties.flags.push(TaskFlag.LowPriority);
         }
         if (!this.hasFlagGroup(TaskFlagGroup.ErrorHandling)) {
-            _properties.flags.push(TaskFlag.HandleErrors);
+            properties.flags.push(TaskFlag.HandleErrors);
         }
         if (!this.hasFlagGroup(TaskFlagGroup.Run)) {
-            _properties.flags.push(TaskFlag.OnceOffDataResolve);
+            properties.flags.push(TaskFlag.OnceOffWithOutput);
         }
     }
     /**
      * @param { String } name,
      * @param { class } context
      * @param { Object } data
+     * @param { Number } timeoutMilli
      * @param { Array<TaskFlag> } flags
      * @returns { Task }
     */
-    static create(name, context, data, flags = []) {
-        return new Task(name, context, data, flags);
+    static create(name, context, data, timeoutMilli, flags = []) {
+        return new Task(name, context, data, timeoutMilli, flags);
     }
     /**
      * @param { T } type
@@ -70,12 +46,8 @@ export class Task {
         const properties = privateBag.get(this);
         properties.stack = (new Error()).stack;
         properties.callback = callback;
-        return new Promise((resolve, reject) => {
-            properties.resolve = resolve;
-            properties.reject = reject;
-            Object.seal(properties);
-            TaskQueue.enqueue(this, properties);
-        });
+        TaskQueue.enqueue(this, properties);
+        return properties.promise.get();
     }
     /**
      * @returns { TaskState }
@@ -110,28 +82,20 @@ export class Task {
     */
     complete(data) {
         const properties = privateBag.get(this);
-        if (properties.resolve) {
-            properties.data = data;
-            if (properties.data === undefined || properties.data === null) {
-                properties.state = TaskState.PromiseResolvedNoResults;
-                properties.states.push(properties.state);
-            } else {
-                properties.state = TaskState.PromiseResolvedWithResults;
-                properties.states.push(properties.state);
-            }
+        properties.data = data;
+        if (properties.data === undefined || properties.data === null) {
+            properties.state = TaskState.PromiseResolvedNoData;
         } else {
-            properties.state = TaskState.Error;
-            properties.states.push(properties.state);
-            properties.error = new Error(`critical error, complete task was called without a promise resolve function`);
+            properties.state = TaskState.PromiseResolvedWithData;
         }
     }
     /**
-    * @param { TaskState } state
-    * @returns { Boolean }
-   */
+     * @param { TaskState } state
+     * @returns { Boolean }
+    */
     hadState(state) {
-        const { states } = privateBag.get(this);
-        for (const _state of states) {
+        const { stateHistory } = privateBag.get(this);
+        for (const _state of stateHistory) {
             if (_state === state) {
                 return true;
             }
@@ -139,13 +103,16 @@ export class Task {
         return false;
     }
     /**
-     * @param { TaskFlag } flag
+     * @param { Array<TaskFlag> } _flags
      * @returns { Boolean }
     */
-    hasFlag(flag) {
+    hasFlag(_flags = []) {
+        if (!Array.isArray(_flags)) {
+            _flags = [_flags];
+        }
         const { flags } = privateBag.get(this);
-        for (const _flag of flags) {
-            if (flag === _flag) {
+        for (const flag of flags) {
+            if (_flags.find(_flag => _flag === flag)) {
                 return true;
             }
         }

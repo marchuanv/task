@@ -1,6 +1,7 @@
 import { TaskState } from "../lib/task-state.mjs";
 import { Task } from "../task.mjs";
 const nanoSecTimeout = 2000000000; //2 seconds
+const testTaskTimeoutMill = 3000; //3 seconds
 export class TestTask extends Task {
     /**
      * @param { Object } testSuite
@@ -8,7 +9,7 @@ export class TestTask extends Task {
      * @param { Array<TaskFlag> } flags
     */
     constructor(testSuite, name, flags = []) {
-        super(name, { Id: `${name}Id` }, {}, flags);
+        super(name, { Id: `${name}Id` }, null, testTaskTimeoutMill, flags);
         this.suite = testSuite;
     }
     /**
