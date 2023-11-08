@@ -18,7 +18,7 @@ const suite = describe('when a once-off short task is resolved with undefined gi
                 expect(task.error).toBeNull();
                 expect(task.isLongRunning).toBeFalse();
                 expect(task.enqueueCount).toBe(1);
-                expect(task.data).toBeUndefined();
+                expect(task.data).toBeNull();
                 done();
             }, 2000);
         }).catch((task) => {

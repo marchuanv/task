@@ -1,7 +1,7 @@
 
 import { TaskPromise } from '../../lib/task-promise.mjs';
 import { TaskProperties } from '../../lib/task-properties.mjs';
-const suite = fdescribe('when resolving a promise for a repeated task given data and queue timeout', () => {
+const suite = describe('when resolving a promise for a repeated task given data and queue timeout', () => {
     it('should result in error', async () => {
 
         const taskProperties = new TaskProperties('TaskPromiseTestRepeatQueueTimeout', {
@@ -11,18 +11,15 @@ const suite = fdescribe('when resolving a promise for a repeated task given data
         setTimeout(async () => {
             let _taskPromise = new TaskPromise(taskProperties);
             _taskPromise.resolve({ message: 'TaskPromiseTestRepeatQueueTimeout1' });
-            console.log('TaskPromiseTestRepeatQueueTimeout1');
         }, 500);
 
         setTimeout(async () => {
             let _taskPromise = new TaskPromise(taskProperties);
             _taskPromise.resolve({ message: 'TaskPromiseTestRepeatQueueTimeout2' });
-            console.log('TaskPromiseTestRepeatQueueTimeout2');
         }, 1000);
 
         setTimeout(async () => {
             taskProperties.promise.resolve({ message: 'TaskPromiseTestRepeatQueueTimeout' });
-            console.log('TaskPromiseTestRepeatQueueTimeout');
         }, 1000);
 
         try {

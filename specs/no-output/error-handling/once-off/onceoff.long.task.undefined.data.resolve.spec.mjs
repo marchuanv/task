@@ -19,7 +19,7 @@ const suite = describe('when a once-off long task is resolved with undefined giv
                 expect(task.error).toBeNull();
                 expect(task.isLongRunning).toBeTrue();
                 expect(task.enqueueCount).toBe(1);
-                expect(task.data).toBeUndefined();
+                expect(task.data).toBeNull();
                 done();
             }, 2000);
         }).catch((task) => {

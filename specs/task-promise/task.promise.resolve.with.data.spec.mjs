@@ -1,6 +1,6 @@
 
 import { TaskProperties } from '../../lib/task-properties.mjs';
-const suite = fdescribe('when resolving a promise for a task given data', () => {
+const suite = describe('when resolving a promise for a task given data', () => {
     it('should resolve with data', async () => {
         const taskProperties = new TaskProperties('TaskPromiseTest', { Id: 'TaskPromiseTest' }, { message: 'TaskPromiseTest' }, 1000);
         setTimeout(() => {

@@ -33,7 +33,8 @@ export class TestTask extends Task {
                 setTimeout(async () => {
                     resolve(this);
                 }, (timeoutMill + 1000));
-            }).catch(() => {
+            }).catch((error) => {
+                console.error(error);
                 rejected(this);
             });
         });
