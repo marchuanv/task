@@ -10,31 +10,31 @@ const suite = fdescribe('when resolving a promise for a repeated task given data
             let _taskPromise = new TaskPromise(taskProperties);
             _taskPromise.resolve({ message: 'TaskPromiseTestRepeat5' });
             console.log('TaskPromiseTestRepeat5');
-        }, 100);
+        }, 600);
         setTimeout(async () => {
             let _taskPromise = new TaskPromise(taskProperties);
             _taskPromise.resolve({ message: 'TaskPromiseTestRepeat1' });
             console.log('TaskPromiseTestRepeat1');
-        }, 150);
+        }, 500);
         setTimeout(async () => {
             let _taskPromise = new TaskPromise(taskProperties);
             _taskPromise.resolve({ message: 'TaskPromiseTestRepeat2' });
             console.log('TaskPromiseTestRepeat2');
-        }, 300);
+        }, 400);
         setTimeout(async () => {
             let _taskPromise = new TaskPromise(taskProperties);
             _taskPromise.resolve({ message: 'TaskPromiseTestRepeat4' });
             console.log('TaskPromiseTestRepeat4');
-        }, 310);
+        }, 300);
         setTimeout(async () => {
             let _taskPromise = new TaskPromise(taskProperties);
             _taskPromise.resolve({ message: 'TaskPromiseTestRepeat3' });
             console.log('TaskPromiseTestRepeat3');
-        }, 300);
+        }, 200);
         setTimeout(async () => {
             taskProperties.promise.resolve({ message: 'TaskPromiseTestRepeat' });
             console.log('TaskPromiseTestRepeat');
-        }, 400);
+        }, 100);
         const results = await taskProperties.promise.get();
         expect(results).toBeDefined();
         expect(results).not.toBeNull();
