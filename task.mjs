@@ -1,9 +1,31 @@
+import { Bag } from './lib/bag.mjs';
 import { TaskFlagGroup } from './lib/task-flag-group.mjs';
 import { TaskFlag } from "./lib/task-flag.mjs";
 import { TaskProperties } from "./lib/task-properties.mjs";
-import { TaskQueue } from './lib/task-queue.mjs';
+import { HighPriorityTaskQueue } from './lib/task-queues/high-priority-task-queue.mjs';
+import { LowPriorityTaskQueue } from './lib/task-queues/low-priority-task-queue.mjs';
+import { MediumPriorityTaskQueue } from './lib/task-queues/medium-priority-task-queue.mjs';
+import { TaskRunner } from './lib/task-runner.mjs';
+import { TaskStateStack } from './lib/task-state-stack.mjs';
 import { TaskState } from './lib/task-state.mjs';
-let privateBag = new WeakMap();
+import { TaskCallbackState } from './lib/task-states/task-callback-state.mjs';
+import { TaskCreatedState } from './lib/task-states/task-created-state.mjs';
+import { TaskReadyState } from './lib/task-states/task-ready-state.mjs';
+import { TaskRequeueState } from './lib/task-states/task-requeue-state.mjs';
+import { TaskWaitForPromiseState } from './lib/task-states/task-waitforpromise-state.mjs';
+
+const container = new WeakMap();
+/**
+ * @param { Object } context
+ * @returns { Bag }
+*/
+function getBag(context) {
+    if (!container.has(context)) {
+        container.set(context, new Bag());
+    }
+    return container.get(context);
+}
+
 export class Task {
     /**
      * @param { String } name
@@ -13,17 +35,34 @@ export class Task {
      * @param { Array<TaskFlag> } flags
     */
     constructor(name, context, data, timeoutMilli, flags = []) {
-        const properties = new TaskProperties(name, context, data, timeoutMilli, flags, this);
-        Object.seal(properties);
-        privateBag.set(this, properties);
+        const bag = getBag(this);
+
+        bag.taskStateStack = new TaskStateStack(this);
+        bag.taskCallbackState = new TaskCallbackState(this);
+        bag.taskCreatedState = new TaskCreatedState(this);
+        bag.taskState = bag.taskCreatedState;
+        bag.taskReadyState = new TaskReadyState(this);
+        bag.taskRequeueState = new TaskRequeueState(this);
+        bag.taskWaitForPromiseState = new TaskWaitForPromiseState(this);
+        bag.taskProperties = new TaskProperties(name, context, data, timeoutMilli, flags, this);
+        bag.taskRunner = new TaskRunner(this);
         if (!this.hasFlagGroup(TaskFlagGroup.Priority)) {
-            properties.flags.push(TaskFlag.LowPriority);
+            bag.flags.push(TaskFlag.LowPriority);
         }
         if (!this.hasFlagGroup(TaskFlagGroup.ErrorHandling)) {
-            properties.flags.push(TaskFlag.HandleErrors);
+            bag.flags.push(TaskFlag.HandleErrors);
         }
         if (!this.hasFlagGroup(TaskFlagGroup.Run)) {
-            properties.flags.push(TaskFlag.OnceOffWithOutput);
+            bag.flags.push(TaskFlag.OnceOffWithOutput);
+        }
+        if (this.hasFlag([TaskFlag.HighPriority])) {
+            bag.taskRunner.taskQueue = new HighPriorityTaskQueue(this);
+        }
+        if (this.hasFlag([TaskFlag.MediumPriority])) {
+            bag.taskRunner.taskQueue = new MediumPriorityTaskQueue(this);
+        }
+        if (this.hasFlag([TaskFlag.LowPriority])) {
+            bag.taskRunner.taskQueue = new LowPriorityTaskQueue(this);
         }
     }
     /**
@@ -43,65 +82,44 @@ export class Task {
      * @returns { Promise<T> }
     */
     run(type, callback) {
-        const properties = privateBag.get(this);
-        properties.stack = (new Error()).stack;
-        properties.callback = callback;
-        TaskQueue.enqueue(this, properties);
-        return properties.promise.get();
+        const bag = getBag(this);
+        bag.callback = callback;
+        bag.taskQueue.callback = callback;
+        bag.taskRunner.callback = callback;
+        bag.taskRunner.run();
+        return bag.promise;
     }
     /**
-     * @returns { TaskState }
+     * @returns { String }
     */
     get Id() {
-        const { Id } = privateBag.get(this);
-        return Id;
+        return getBag(this).Id;
     }
     /**
-     * @returns { TaskState }
+     * @returns { String }
     */
     get contextId() {
-        const { contextId } = privateBag.get(this);
-        return contextId;
+        return getBag(this).contextId;
     }
     /**
-     * @returns { TaskState }
+     * @returns { String }
     */
     get name() {
-        const { name } = privateBag.get(this);
-        return name;
+        return getBag(this).name;
     }
     /**
      * @returns { TaskState }
     */
     get state() {
-        const { state } = privateBag.get(this);
-        return state;
+        return getBag(this).taskStateStack.peek();
     }
     /**
      * @param { Object }
     */
     complete(data) {
-        const properties = privateBag.get(this);
-        properties.data = data;
-        if (properties.data === undefined || properties.data === null) {
-            properties.state = TaskState.PromiseResolvedNoData;
-        } else {
-            properties.state = TaskState.PromiseResolvedWithData;
-        }
+        getBag(this).data = data;
     }
-    /**
-     * @param { TaskState } state
-     * @returns { Boolean }
-    */
-    hadState(state) {
-        const { stateHistory } = privateBag.get(this);
-        for (const _state of stateHistory) {
-            if (_state === state) {
-                return true;
-            }
-        }
-        return false;
-    }
+
     /**
      * @param { Array<TaskFlag> } _flags
      * @returns { Boolean }
@@ -110,26 +128,25 @@ export class Task {
         if (!Array.isArray(_flags)) {
             _flags = [_flags];
         }
-        const { flags } = privateBag.get(this);
-        for (const flag of flags) {
+        for (const flag of getBag(this).flags) {
             if (_flags.find(_flag => _flag === flag)) {
                 return true;
             }
         }
         return false;
     }
+    /**
+     * @returns { Array<string> } _flags
+    */
     get flags() {
-        const { flags } = privateBag.get(this);
-        const _flags = flags.map(f => f.toString());
-        return _flags;
+        return getBag(this).flags.map(f => f.toString());
     }
     /**
      * @param { TaskFlagGroup } flagGroup
      * @returns { Boolean }
     */
     hasFlagGroup(flagGroup) {
-        const { flags } = privateBag.get(this);
-        for (const _flag of flags) {
+        for (const _flag of getBag(this).flags) {
             if (_flag.group === flagGroup) {
                 return true;
             }
@@ -140,41 +157,36 @@ export class Task {
      * @returns { String }
     */
     toString() {
-        return `${this.contextId}: ${this.name}(${this.Id})`;
+        return `${getBag(this).contextId}: ${getBag(this).name}(${getBag(this).Id})`;
     }
     /**
      * @returns { Number }
     */
     get enqueueCount() {
-        const { enqueueCount } = privateBag.get(this);
-        return enqueueCount;
+        return getBag(this).enqueueCount;
     }
     /**
      * @returns { Number }
     */
     get startTime() {
-        const { startTime } = privateBag.get(this);
-        return startTime;
+        return getBag(this).startTime;
     }
     /**
      * @returns { Number }
     */
     get endTime() {
-        const { endTime } = privateBag.get(this);
-        return endTime;
+        return getBag(this).endTime;
     }
     /**
      * @returns { Error }
     */
     get error() {
-        const { error } = privateBag.get(this);
-        return error;
+        return getBag(this).error;
     }
     /**
      * @returns { Object }
     */
     get data() {
-        const { data } = privateBag.get(this);
-        return data;
+        return getBag(this).data;
     }
 }
