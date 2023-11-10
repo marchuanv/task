@@ -24,6 +24,7 @@ export class Task {
         const bag = getBag(this);
         bag.name = name;
         bag.context = context;
+        bag.contextId = context.Id;
         bag.data = data;
         bag.timeoutMilli = timeoutMilli;
         bag.flags = flags;

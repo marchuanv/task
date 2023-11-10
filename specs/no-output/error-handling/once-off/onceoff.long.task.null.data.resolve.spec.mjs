@@ -1,7 +1,7 @@
 import { TaskFlag } from '../../../../lib/task-flag.mjs';
 import { Task } from '../../../../task.mjs';
 import { TestTask } from '../../../test-task.mjs';
-const suite = fdescribe('when a once-off long task is resolved with null given NO errors', () => {
+const suite = describe('when a once-off long task is resolved with null given NO errors', () => {
 
     let promise;
     beforeAll(async () => {
