@@ -30,8 +30,8 @@ export class Task {
         bag.flags = flags;
         bag.taskStateStack = new TaskStateStack(this);
         bag.taskState = new TaskCreatedState(this);
-        bag.taskRunner = new TaskRunner(this);
         bag.taskPromise = new TaskPromise(this);
+        bag.taskRunner = new TaskRunner(this);
         if (!this.hasFlagGroup(TaskFlagGroup.Priority)) {
             bag.flags.push(TaskFlag.LowPriority);
         }
