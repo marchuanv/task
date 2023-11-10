@@ -1,30 +1,20 @@
-import { Bag } from './lib/bag.mjs';
-import { TaskFlagGroup } from './lib/task-flag-group.mjs';
-import { TaskFlag } from "./lib/task-flag.mjs";
-import { TaskProperties } from "./lib/task-properties.mjs";
-import { HighPriorityTaskQueue } from './lib/task-queues/high-priority-task-queue.mjs';
-import { LowPriorityTaskQueue } from './lib/task-queues/low-priority-task-queue.mjs';
-import { MediumPriorityTaskQueue } from './lib/task-queues/medium-priority-task-queue.mjs';
-import { TaskRunner } from './lib/task-runner.mjs';
-import { TaskStateStack } from './lib/task-state-stack.mjs';
-import { TaskState } from './lib/task-state.mjs';
-import { TaskCallbackState } from './lib/task-states/task-callback-state.mjs';
-import { TaskCreatedState } from './lib/task-states/task-created-state.mjs';
-import { TaskReadyState } from './lib/task-states/task-ready-state.mjs';
-import { TaskRequeueState } from './lib/task-states/task-requeue-state.mjs';
-import { TaskWaitForPromiseState } from './lib/task-states/task-waitforpromise-state.mjs';
-
-const container = new WeakMap();
-/**
- * @param { Object } context
- * @returns { Bag }
-*/
-function getBag(context) {
-    if (!container.has(context)) {
-        container.set(context, new Bag());
-    }
-    return container.get(context);
-}
+import {
+    HighPriorityTaskQueue,
+    LowPriorityTaskQueue,
+    MediumPriorityTaskQueue,
+    TaskCallbackState,
+    TaskCreatedState,
+    TaskFlag,
+    TaskFlagGroup,
+    TaskPromise,
+    TaskReadyState,
+    TaskRequeueState,
+    TaskRunner,
+    TaskState,
+    TaskStateStack,
+    TaskWaitForPromiseState,
+    getBag
+} from "./lib/registry.mjs";
 
 export class Task {
     /**
@@ -36,7 +26,11 @@ export class Task {
     */
     constructor(name, context, data, timeoutMilli, flags = []) {
         const bag = getBag(this);
-
+        bag.name = name;
+        bag.context = context;
+        bag.data = data;
+        bag.timeoutMilli = timeoutMilli;
+        bag.flags = flags;
         bag.taskStateStack = new TaskStateStack(this);
         bag.taskCallbackState = new TaskCallbackState(this);
         bag.taskCreatedState = new TaskCreatedState(this);
@@ -44,8 +38,8 @@ export class Task {
         bag.taskReadyState = new TaskReadyState(this);
         bag.taskRequeueState = new TaskRequeueState(this);
         bag.taskWaitForPromiseState = new TaskWaitForPromiseState(this);
-        bag.taskProperties = new TaskProperties(name, context, data, timeoutMilli, flags, this);
         bag.taskRunner = new TaskRunner(this);
+        bag.promise = new TaskPromise(this);
         if (!this.hasFlagGroup(TaskFlagGroup.Priority)) {
             bag.flags.push(TaskFlag.LowPriority);
         }
