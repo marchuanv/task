@@ -2,17 +2,13 @@ import {
     HighPriorityTaskQueue,
     LowPriorityTaskQueue,
     MediumPriorityTaskQueue,
-    TaskCallbackState,
     TaskCreatedState,
     TaskFlag,
     TaskFlagGroup,
     TaskPromise,
-    TaskReadyState,
-    TaskRequeueState,
     TaskRunner,
     TaskState,
     TaskStateStack,
-    TaskWaitForPromiseState,
     getBag
 } from "./lib/registry.mjs";
 
@@ -32,14 +28,9 @@ export class Task {
         bag.timeoutMilli = timeoutMilli;
         bag.flags = flags;
         bag.taskStateStack = new TaskStateStack(this);
-        bag.taskCallbackState = new TaskCallbackState(this);
-        bag.taskCreatedState = new TaskCreatedState(this);
-        bag.taskState = bag.taskCreatedState;
-        bag.taskReadyState = new TaskReadyState(this);
-        bag.taskRequeueState = new TaskRequeueState(this);
-        bag.taskWaitForPromiseState = new TaskWaitForPromiseState(this);
+        bag.taskState = new TaskCreatedState(this);
         bag.taskRunner = new TaskRunner(this);
-        bag.promise = new TaskPromise(this);
+        bag.taskPromise = new TaskPromise(this);
         if (!this.hasFlagGroup(TaskFlagGroup.Priority)) {
             bag.flags.push(TaskFlag.LowPriority);
         }
@@ -80,8 +71,9 @@ export class Task {
         bag.callback = callback;
         bag.taskQueue.callback = callback;
         bag.taskRunner.callback = callback;
+        bag.taskQueue.enqueue();
         bag.taskRunner.run();
-        return bag.promise;
+        return bag.taskPromise.get();
     }
     /**
      * @returns { String }
