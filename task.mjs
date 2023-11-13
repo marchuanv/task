@@ -28,10 +28,10 @@ export class Task {
         bag.data = data;
         bag.timeoutMilli = timeoutMilli;
         bag.flags = flags;
-        bag.taskStateStack = new TaskStateStack(this);
-        bag.taskState = new TaskCreatedState(this);
-        bag.taskPromise = new TaskPromise(this);
-        bag.taskRunner = new TaskRunner(this);
+        new TaskStateStack(this);
+        new TaskCreatedState(this);
+        new TaskPromise(this);
+        new TaskRunner(this);
         if (!this.hasFlagGroup(TaskFlagGroup.Priority)) {
             bag.flags.push(TaskFlag.LowPriority);
         }
@@ -42,13 +42,13 @@ export class Task {
             bag.flags.push(TaskFlag.OnceOffWithOutput);
         }
         if (this.hasFlag([TaskFlag.HighPriority])) {
-            bag.taskRunner.taskQueue = new HighPriorityTaskQueue(this);
+            new HighPriorityTaskQueue(this);
         }
         if (this.hasFlag([TaskFlag.MediumPriority])) {
-            bag.taskRunner.taskQueue = new MediumPriorityTaskQueue(this);
+            new MediumPriorityTaskQueue(this);
         }
         if (this.hasFlag([TaskFlag.LowPriority])) {
-            bag.taskRunner.taskQueue = new LowPriorityTaskQueue(this);
+            new LowPriorityTaskQueue(this);
         }
     }
     /**
